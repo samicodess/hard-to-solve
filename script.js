@@ -884,69 +884,71 @@ Mage.prototype = Object.create(Sprite.prototype);
 
 // Mage Class
 
-
-
-
-
 // Enemy Class
-
-
-
 
 // Enemy class
 
-
-
 // projectile class
 function MageBullet(pos, mirror) {
-    Sprite.call(this);
-    this.post = {x:pos.x, y:pos.y};
-    this.size = 24;
-    this.mirror = mirror;
+  Sprite.call(this);
+  this.post = { x: pos.x, y: pos.y };
+  this.size = 24;
+  this.mirror = mirror;
 
+  this.create = function () {
+    this.id = get_id();
+    this.set_cycle(data.bullet.move, 500);
+    map.data.foreground[this.id] = this;
+    var a = this;
+    this.interval = new Interval(function () {
+      a.pos.x += map.tile_size / (a.mirror ? -3 : 3);
+    }, 15);
+  };
 
-    this.create = function() {
-        this.id = get_id();
-        this.set_cycle(data.bullet.move, 500);
-        map.data.foreground[this.id] = this;
-        var a = this;
-        this.interval = new Interval(function() {
-            a.pos.x += map.tile_size/(a.mirror?-3:3);
-        }, 15);
-    };
+  this.draw = function (x, y) {
+    // var coords = map.get_coords([this.pos.y, this.pos.x]);
+    // var x = this.pos.x + map.offset.x;
+    // var y = this.pos.y + map.offset.y;
+    this.blit(x - this.size / 2, y - this.zie / 2, this.mirror);
+  };
 
-    this.draw = function(x,y) {
-           // var coords = map.get_coords([this.pos.y, this.pos.x]);
-        // var x = this.pos.x + map.offset.x;
-        // var y = this.pos.y + map.offset.y;
-        this.blit(x-this.size/2, y-this.zie/2, this.mirror);
-    };
-
-
-    this.create();
+  this.create();
 }
 
 MageBullet.prototype = Object.create(Sprite.prototype);
 
 // projectile class
 
-
-
 //coin class
 
-function Coin(x,y) {
-    Sprite.call(this);
-    this.pos = {x:x, y:y};
-    this.coords = map.get_coords([y,x]);
-    this.size = 24;
-    this.id = get_id();
-    this.draw = function() {
-        var x = this.coords.x + map.offset.x;
-        var y = this.coords.y + map.offset.y;
-        this.blit(x-this.size/2, y-this.size/2);
-    };
+function Coin(x, y) {
+  Sprite.call(this);
+  this.pos = { x: x, y: y };
+  this.coords = map.get_coords([y, x]);
+  this.size = 24;
+  this.id = get_id();
+  this.draw = function () {
+    var x = this.coords.x + map.offset.x;
+    var y = this.coords.y + map.offset.y;
+    this.blit(x - this.size / 2, y - this.size / 2);
+  };
 }
 
 Coin.prototype = Object.create(Sprite.prototype);
 
 // coin class
+
+
+
+/* map class */
+
+
+/* Background is the background image and shouldn't be
+   changed in game. Foreground is for light data images
+   and sprites that need to update every frame.
+   Updating background needs a Map.create call to render changes 
+*/
+
+
+
+// map class
