@@ -885,6 +885,42 @@ Mage.prototype = Object.create(Sprite.prototype);
 // Mage Class
 
 // Enemy Class
+function Enemy(x, y) {
+  Sprite.call(this);
+  this.size = 24;
+  this.pos = {
+    x: (x + 0.5) * map.tile_size + (map.tile_size - this.size) / 2,
+    y: (y + 0.5) * map.tile_size + (map.tile_size - this.zie) / 2,
+  };
+  this.mirror = false;
+  var color = Math.floor(4 * Math.random());
+
+  this.create = function () {
+    this.id = get_id();
+    this.set_cycle(data.enemy[color], 300);
+    map.data.foreground[this.id] = this;
+
+    var a = this;
+    this.interval = new Interval(function () {
+      var np = { x: pos.x + map.tile_size / (a.mirror ? -6 : 6), y: a.pos.y };
+      var col = block.collisions(a.pos, a.size);
+      if ((col.bbl && !col.bbr) || (col.bbr && !col.bbl) || col.tr || col.tl) {
+        a.mirror = !a.mirror;
+      }
+      a.pos.x += map.tile_size / (a.mirror ? -20 : 20);
+    }, 40);
+  };
+
+  this.draw = function (x, y) {
+    // var x = this.pos.x + map.offset.x;
+    // var y = this.pos.y + map.offset.y;
+    this.blit(x - this.size / 2, y - this.size / 2, this.mirror);
+  };
+
+  this.create();
+}
+
+Enemy.prototype = Object.create(Sprite.prototype);
 
 // Enemy class
 
@@ -938,10 +974,7 @@ Coin.prototype = Object.create(Sprite.prototype);
 
 // coin class
 
-
-
 /* map class */
-
 
 /* Background is the background image and shouldn't be
    changed in game. Foreground is for light data images
@@ -949,6 +982,92 @@ Coin.prototype = Object.create(Sprite.prototype);
    Updating background needs a Map.create call to render changes 
 */
 
+function Map() {
+  this.tile_size = 32; //praseInt(prompt("Blocksize: ", 32));
+  this.width = null;
+  this.height = null;
+  this.img = new Image();
+  this.offset = { x: 0, y: 0 }; // drawing offset ( translation)
+  this.data = { foreground: {} };
+  this.create = function () {
+    var h = this.tile_size * this.data.background.length;
+    var w = this.tile_size * this.data.background[0].length;
+    c.width = w;
+    c.height = h;
+    c.style.width = w + "px";
+    c.style.height = h + "px";
+    this.detailed_draw();
+    this.img.src = c
+      .toDataURL("image/png")
+      .replace("image/png", "image/octet-stream");
+    c.width = W;
+    c.height = H;
+    c.style.width = W + "px";
+    c.style.height = H + "px";
+  };
+  this.draw = function () {
+    // background image
+    if (this.background_img) {
+      ctx.drawImage(
+        this.background_img,
+        this.offset.x - window.innerWidth / 2 - 50,
+        this.offset.y - window.innerHeight / 3
+      );
 
+      // satic bacgkground
+      ctx.drawImage(this.img, this.offset.x, this.offset.y);
+
+      // non static foregorund
+      for (var i in this.data.foreground) {
+        var sprite = this.data.foreground[i];
+        sprite.draw(sprite.pos.x + this.offset.x, sprite.pos.y + this.offset.y);
+      }
+    }
+    this.detailed_draw = function () {
+      // background image
+      if (this.background_img) {
+        ctx.drawImage(
+          this.background_img,
+          this.offset.x - window.innerWidth / 2 - 50,
+          this.offset.y - window.innerHeight / 3
+        );
+
+        // static background
+        ctx.drawImage(this.img, this.offset.x, this.offset.y);
+
+        //  non-static background
+        for (var i in this.data.foreground) {
+          var sprite = this.data.foreground[i];
+          sprite.draw(
+            sprite.pos.x + this.offset.x,
+            sprite.pos.y + this.offset.y
+          );
+        };
+
+        this.detailed_draw = function() {
+          for(var y in this.data.foreground) {
+            for(var x in this.data.foreground[y]) {
+              var tile_id = this.data.background[y][x];
+              if(this.enemy-tile == tile_id) tile_id = 0;
+              var mirror_tile = title_id < 0;
+              var tile = this.data.tiles[Math.abs(tile_id)][0];
+              if(mirror_tile) tile = this.mirror_tile(tile);
+
+              if(32 % tile.length !== 0) {
+                throw "Tile SizeError: tile "+tile_id+";"+tile.length;
+
+                for(var ty in tile) {
+                  if(32 % tile[ty].length !== 0) 
+                    throw "Tile SizeError: tile "+tile_id+": "+tile[ty].length;
+                  
+                }
+              }
+            }
+          }
+        }
+      }
+    };
+  };
+}
 
 // map class
