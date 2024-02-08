@@ -20,7 +20,7 @@ most featured are designed for mobile/touch devices
 1059 - 1164:    Map class
 1175 - 1441:    Minimap class
 1462 - 1626:    Controls class
-1647 - 1789:    DOM Elenment class
+1647 - 1789:    DOM Element class
 1814 - 1828:    Interval class
 1833 - 1911:    Class functions
 1945 - 1960:    Camera focus
@@ -407,7 +407,7 @@ var set_mana = function (value /* 0-8*/) {
   }
 };
 
-var set_health = function (valu /* 0-8*/) {
+var set_health = function (value /* 0-8*/) {
   if (value === 0) {
     health_left.div.style.backgroundPosition = "-96px -352px";
     health_right.div.style.backgroundPosition = "-352px -352px";
@@ -954,6 +954,37 @@ function MageBullet(pos, mirror) {
 MageBullet.prototype = Object.create(Sprite.prototype);
 
 // projectile class
+function MageBullet(pos, mirror) {
+  Sprite.call(this);
+  this.pos = {x: pos.x, y: pos.y};
+  this.size = 24;
+  this.mirror = mirror;
+
+  this.create = function() {
+    this.id = get_id();
+    this.set_cycle(data.bullet.move, 500);
+    map.data.foreground[this.id] = this;
+    var a = this;
+    this.interval = new Interval(function() {
+      a.pos.x += map.tile_size/(a.mirror?-3:3);
+    }, 16);
+  };
+
+  this.draw = function(x,y) {
+         // var coords = map.get_coords([this.pos.y, this.pos.x]);
+        // var x = this.pos.x + map.offset.x;
+        // var y = this.pos.y + map.offset.y;
+        this.blit(x-this.size/2, y-this.size/2, this.mirror);
+  }
+
+  this.create();
+}
+
+MageBullet.prototype = Object.create(Sprite.prototype);
+
+// projectile
+
+
 
 //coin class
 
@@ -974,100 +1005,149 @@ Coin.prototype = Object.create(Sprite.prototype);
 
 // coin class
 
-/* map class */
+
+
+
+
+/* <Map class> */
+
 
 /* Background is the background image and shouldn't be
    changed in game. Foreground is for light data images
    and sprites that need to update every frame.
    Updating background needs a Map.create call to render changes 
 */
-
 function Map() {
-  this.tile_size = 32; //praseInt(prompt("Blocksize: ", 32));
+  this.tile_size = 32; // parseInt(prompt("Blocksize: ", 32));
   this.width = null;
   this.height = null;
   this.img = new Image();
-  this.offset = { x: 0, y: 0 }; // drawing offset ( translation)
-  this.data = { foreground: {} };
-  this.create = function () {
-    var h = this.tile_size * this.data.background.length;
-    var w = this.tile_size * this.data.background[0].length;
-    c.width = w;
-    c.height = h;
-    c.style.width = w + "px";
-    c.style.height = h + "px";
-    this.detailed_draw();
-    this.img.src = c
-      .toDataURL("image/png")
-      .replace("image/png", "image/octet-stream");
-    c.width = W;
-    c.height = H;
-    c.style.width = W + "px";
-    c.style.height = H + "px";
+  this.offset = {x:0, y:0}; // drawing offset (translation)
+  this.data = {foreground:{}};
+  this.create = function() {
+      var h = this.tile_size*this.data.background.length;
+      var w = this.tile_size*this.data.background[0].length;
+      c.width = w; c.height = h;
+      c.style.width = w+"px"; c.style.height = h+"px";
+      this.detailed_draw();
+      this.img.src = c.toDataURL("image/png")
+      .replace("image/png","image/octet-stream");
+      c.width = W; c.height = H;
+      c.style.width = W+"px"; c.style.height = H+"px";
   };
-  this.draw = function () {
-    // background image
-    if (this.background_img) {
-      ctx.drawImage(
-        this.background_img,
-        this.offset.x - window.innerWidth / 2 - 50,
-        this.offset.y - window.innerHeight / 3
-      );
-
-      // satic bacgkground
+  this.draw = function() {
+      /* background image */
+      if(this.background_img)
+          ctx.drawImage(this.background_img,
+          this.offset.x-window.innerWidth/2-50, this.offset.y-window.innerHeight/3);
+      
+      /* static background */
       ctx.drawImage(this.img, this.offset.x, this.offset.y);
-
-      // non static foregorund
-      for (var i in this.data.foreground) {
-        var sprite = this.data.foreground[i];
-        sprite.draw(sprite.pos.x + this.offset.x, sprite.pos.y + this.offset.y);
-      }
-    }
-    this.detailed_draw = function () {
-      // background image
-      if (this.background_img) {
-        ctx.drawImage(
-          this.background_img,
-          this.offset.x - window.innerWidth / 2 - 50,
-          this.offset.y - window.innerHeight / 3
-        );
-
-        // static background
-        ctx.drawImage(this.img, this.offset.x, this.offset.y);
-
-        //  non-static background
-        for (var i in this.data.foreground) {
+      
+      /* non-static foreground */
+      for(var i in this.data.foreground) {
           var sprite = this.data.foreground[i];
-          sprite.draw(
-            sprite.pos.x + this.offset.x,
-            sprite.pos.y + this.offset.y
-          );
-        };
-
-        this.detailed_draw = function() {
-          for(var y in this.data.foreground) {
-            for(var x in this.data.foreground[y]) {
+          sprite.draw(sprite.pos.x+this.offset.x,
+                      sprite.pos.y+this.offset.y);
+      }
+  };
+  this.detailed_draw = function() {
+      for(var y in this.data.background) {
+          for(var x in this.data.background[y]) {
               var tile_id = this.data.background[y][x];
-              if(this.enemy-tile == tile_id) tile_id = 0;
-              var mirror_tile = title_id < 0;
+              if(this.enemy_tile == tile_id) tile_id = 0;
+              var mirror_tile = tile_id < 0;
               var tile = this.data.tiles[Math.abs(tile_id)][0];
               if(mirror_tile) tile = this.mirror_tile(tile);
-
-              if(32 % tile.length !== 0) {
-                throw "Tile SizeError: tile "+tile_id+";"+tile.length;
-
-                for(var ty in tile) {
-                  if(32 % tile[ty].length !== 0) 
-                    throw "Tile SizeError: tile "+tile_id+": "+tile[ty].length;
+          
+              
+              if(32 % tile.length !== 0)
+                  throw "Tile SizeError: tile "+tile_id+
+                        ": "+tile.length;
+              var height = this.tile_size/tile.length;
                   
-                }
+              for(var ty in tile) {
+                  if(32 % tile[ty].length !== 0)
+                  throw "Tile SizeError: tile "+tile_id+
+                        ": "+tile[ty].length;
+                  var width = this.tile_size/tile[ty].length;
+                  for(var tx in tile[ty]) {
+                      ctx.fillStyle =
+                      this.data.colors[tile[ty][tx]];
+                      ctx.fillRect(x*this.tile_size+tx*
+                                   width+this.offset.x,
+                                   y*this.tile_size+ty*
+                                   height+this.offset.y,
+                                   width, height);
+                  }
               }
-            }
           }
-        }
       }
-    };
+  };
+  this.mirror_tile = function(tile) {
+      var new_tile = JSON.parse(JSON.stringify(tile));
+      for(var i in new_tile) new_tile[i].reverse();
+      return new_tile;
+  };
+  this.get_tile = function(x,y) {
+      return this.data.background[y][x];
+  };
+  this.get_coords = function(a) {
+      return {x: this.tile_size*a[1]+this.tile_size/2,
+              y: this.tile_size*a[0]+this.tile_size/2};
+  };
+  
+  this.update_animation = function() {
+      if(!paused) {
+         for(var i in this.data.foreground) {
+              this.data.foreground[i].update_animation();
+          }
+      }
+  };
+  
+  this.update = function() {
+      if(!paused) {
+          for(var i in this.data.foreground) {
+              this.data.foreground[i].update();
+          }
+      }
   };
 }
 
-// map class
+/* </Map class> */
+
+
+
+
+/* <Minimap class> */
+/* </Minimap class> */
+
+
+
+
+/* <Controls class> */
+/* </Controls class> */
+
+
+
+/* <DOM Element class> */
+/* </DOM Element class> */
+
+
+
+/* <Interval class> */
+/* </Interval class> */
+
+
+/* <Class functions> */
+/* </Class functions> */
+
+
+
+/**************************************************************/
+
+
+
+
+
+/*************************[FUNCTIONS]**************************/
