@@ -1120,6 +1120,19 @@ function Map() {
 
 
 /* <Minimap class> */
+var minimap_colors = { 
+  0:"rgba(0,0,0,0)", 1:"#fff",
+  enemy: "#f00", coin: "#ff0",
+  bullet: "#f0f", 3: "#0f0",
+  2: "#0f0", mage: "#0f0",
+  4: "#00f", 5: "#fa0",
+  6: "#0ff"
+}
+
+function Minimap(map, colors) {
+  var mx = window.innerWidth-228+"px", my = "40px",
+  x = "calc(100vw - 72px)", y = "40px";
+}
 /* </Minimap class> */
 
 
@@ -1136,6 +1149,17 @@ function Map() {
 
 
 /* <Interval class> */
+function Interval(callback, speed) {
+  this.speed = speed;
+  this.start = Date.now();
+  this.update = function() {
+    var now = Date.now();
+    if(now - this.start >= this.speed) {
+      this.start = now;
+      callback();
+    }
+  }
+}
 /* </Interval class> */
 
 
@@ -1151,3 +1175,71 @@ function Map() {
 
 
 /*************************[FUNCTIONS]**************************/
+var pause = function () {
+  paused = true;
+};
+
+var resume = function() {
+  paused = false;
+}
+
+var equals = function(c,a) {
+  if(!a || !c) return false;
+  for(var i in c) {
+    for(var j in c[i]) {
+      if(c[i][j] !== a[1][i][j]) return false;
+    }
+   } return true;
+};
+
+/* <Camera focus> */
+/* <Camera focus> */
+
+
+/* <Block effects> */
+/* <Block effects> */
+
+/* <Mage - Block collision> */
+/* <Mage - Block collision> */
+
+/* <Mage - Coin collision> */
+/* <Mage - Coin collision> */
+
+/* <Projectile collision> */
+/* <Projectile collision> */
+
+/* <Enemy collision> */
+/* <Enemy collision> */
+
+/* <Keyboard controls> */
+/* <Keyboard controls> */
+
+/* <Map initialization> */
+/* <Map initialization> */
+
+
+/***************************[DATA]****************************/
+
+/* <Level loading> */
+/* <Level loading> */
+
+/* <Sprite + Level data> */
+/* <Sprite + Level data> */
+
+
+/* <Image slicing> */
+/* <Image slicing> */
+
+
+/**************************************************************/
+
+
+
+// vvv
+// coin deletion / interval deletion
+
+
+/**************************************************************/
+// var print = function(o) {console.log(JSON.stringify(o));};
+// }
+/**************************************************************/
